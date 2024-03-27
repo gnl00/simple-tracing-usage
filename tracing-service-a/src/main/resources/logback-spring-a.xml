@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+<!--    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
+<!--    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />-->
+
+    <!--    <property name="logHome" value="logs" />-->
+    <!--    <property name="appName" value="springApp" />-->
+
+<!--    <property resource="application.properties" />-->
+    <property resource="application.yml" />
+    <property name="highlight-log-pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %boldYellow([%thread]) %highlight(%-5level) -[%X{TRACE_ID}]-  %cyan(%logger{20}#[%method,%line]) - %msg%n" />
+
+    <!-- logback.template.xml 在 Spring 容器启动之前加载，早于 springProperty 获取时机 -->
+    <!-- logback-spring-a.xml 在 Spring 容器启动之后加载 -->
+    <springProperty scope="context" name="logHome" source="logging.file.path"
+                    defaultValue="logs"/>
+    <springProperty scope="context" name="appName" source="spring.application.name"
+                    defaultValue="app"/>
+
+    <!--输出到控制台-->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 输出的日志内容格式化-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>${highlight-log-pattern}</pattern>
+        </layout>
+    </appender>
+
+    <appender name="FILE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 日志文件的路径及文件名 -->
+        <file>${logHome}/${appName}/log_debug.log</file>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>${highlight-log-pattern}</pattern>
+            </layout>
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
+        </encoder>
+        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 日志归档 -->
+            <fileNamePattern>${logHome}/${appName}/debug/log-debug-%d{yyyy-MM-dd}.%i.log.zip
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>300MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!--日志文件保留天数-->
+            <maxHistory>365</maxHistory>
+        </rollingPolicy>
+        <!-- 此日志文件只记录debug级别的 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>debug</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="FILE_DEBUG_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE_DEBUG" />
+    </appender>
+
+    <logger name="org.springframework.web" level="DEBUG"/>
+
+    <root level="DEBUG">
+        <!-- FILE_DEBUG 日志输出添加到 logger -->
+        <appender-ref ref="FILE_DEBUG_ASYNC"/>
+    </root>
+    <root level="INFO">
+        <!-- 标识这个"${STDOUT}"将会添加到这个logger -->
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
