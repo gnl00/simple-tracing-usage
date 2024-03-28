@@ -1,8 +1,5 @@
 package com.stu.listener;
 
-import com.stu.TracingConstants;
-import com.stu.TracingUtils;
-import org.slf4j.MDC;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.ApplicationListener;
 
@@ -34,6 +31,6 @@ public class ApplicationStartingEventListener implements ApplicationListener<App
          * }
          * }</pre>
          */
-        MDC.put(TracingConstants.TRANCE_ID, TracingUtils.generateTraceId());
+        // MDC.put(TracingConstants.TRANCE_ID, TracingUtils.generateTraceId());
     }
 }

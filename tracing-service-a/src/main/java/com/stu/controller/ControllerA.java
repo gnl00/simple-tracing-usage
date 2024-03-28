@@ -1,7 +1,7 @@
-package com.stu;
+package com.stu.controller;
 
+import com.stu.service.ServiceA;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,12 +15,15 @@ public class ControllerA {
     @Autowired
     private ServiceA serviceA;
 
-    @GetMapping("/str")
-    public String str() {
-        String traceId = TracingUtils.generateTraceId();
-        MDC.put(TracingConstants.TRANCE_ID, traceId);
-        log.trace("tracing id: {}, for method str() in Class: {}", traceId, getClass());
-        serviceA.serviceStr();
-        return "ControllerA#str()";
+    @GetMapping("/once")
+    public String once() {
+        serviceA.srvOnce();
+        return "ControllerA#once()";
+    }
+
+    @GetMapping("/pool")
+    public String pool() {
+        serviceA.srvPool();
+        return "ControllerA#pool()";
     }
 }
