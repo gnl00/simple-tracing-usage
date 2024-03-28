@@ -3,4 +3,7 @@ server:
 
 spring:
   application:
-    name: tracing-service-b
+    name: @project.artifactId@
+
+project:
+  build-dir: @project.build.directory@
