@@ -1,20 +1,20 @@
 package com.stu.service;
 
-import com.alibaba.ttl.TtlRunnable;
-import com.alibaba.ttl.threadpool.TtlExecutors;
 import com.stu.TraceConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
 public class ServiceA {
 
+    /**
+     * 只需要使用自定义的 asyncExecutor 来包装需要执行的任务
+     * 就能让自线程获取到父线程的 traceId
+     */
     private final Executor asyncExecutor;
 
     public ServiceA(Executor asyncExecutor) {
@@ -37,9 +37,6 @@ public class ServiceA {
         log.info("trace id outer: {}", MDC.get(TraceConstants.TRACE_ID));
 
         int threadCount = 10;
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        Executor ttlExecutor = TtlExecutors.getTtlExecutor(executorService);
-
         for (int i = 0; i < threadCount; i++) {
             final int finalI = i;
             Thread thread = new Thread(() -> {
