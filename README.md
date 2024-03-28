@@ -171,6 +171,8 @@ public void srvPool() {
 
 最后使用阿里巴巴开源的 transmittable-thread-local，历程基本和[这篇文章](https://blog.csdn.net/xiaolong7713/article/details/127274003)一致。
 
+还有一个解决方案是使用 [logback-mdc-ttl](https://github.com/ofpay/logback-mdc-ttl)
+
 3、跨服务传递
 
 跨服务传递就比较简单了，思路很清晰，拦截请求，在 RequestHeader 中添加 traceId，下游服务从 traceId 中获取即可。
