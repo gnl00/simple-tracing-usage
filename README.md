@@ -60,6 +60,8 @@ spring:
 
 ## TraceID
 
+> [TraceId & SpanId](https://zhuanlan.zhihu.com/p/374885660)
+
 进行链路追踪我们一般都需要借助到 TraceID，根据 TraceID 来追踪请求链路。
 
 1、普通请求
