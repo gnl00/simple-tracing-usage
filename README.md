@@ -11,13 +11,19 @@
 
 而 log4j、logback、log4j2 这些日志们则是不同的日志具体实现。
 
+## logback 配置唯一化
+
+只需要一个 logback 配置，放到 core 中，其他项目拉取即可。
+
+具体实现在 `com.stu.listener.ApplicationStartedEventListener`
+
 ---
 
 ## TraceID
 
 进行链路追踪我们一般都需要借助到 TraceID，根据 TraceID 来追踪请求链路。
 
-* 单体应用：MDC + ThreadLocal 传递，单线程 or 多线程 TODO
+* 单体应用：MDC + ThreadLocal 传递 or 切面，单线程 & 多线程 TODO
 * 分布式：将 TraceId 设置到 RequestHeader 中向下传递 TODO
 
 ---

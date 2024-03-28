@@ -2,48 +2,39 @@ package com.stu.listener;
 
 import com.stu.TracingConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
-import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.jar.Manifest;
 
 @Slf4j
 @Component
 public class ApplicationStartedEventListener implements ApplicationListener<ApplicationStartedEvent> {
 
-    @Value("${spring.application.name}")
-    private String appName;
+    @Value("${project.build-dir}")
+    private String buildDir;
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         log.info("## application started");
-        try {
-            ClassPathResource logResource = new ClassPathResource(TracingConstants.LOG_BACK_FILE);
-            File logFile = logResource.getFile();
-
-            log.info("log file: {} exist? {}", logFile.getName(), logFile.exists());
-            log.info("log file path: {}", logFile.getAbsolutePath());
-
-            if (logFile.exists()) {
-                // 这样一来就有一个强制要求：pom.xml 中的 artifactId 必须和项目文件夹名称一致
-                log.info("current artifact: {}", appName);
-                File dest = new File(String.valueOf(Paths.get(appName,"/target/classes/logback-spring.xml")));
-                Files.copy(Paths.get(logFile.getPath()), Paths.get(dest.toURI()), StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                log.error("no logback configuration found!");
-            }
+        log.info("build dir: {}", buildDir);
+        Path destPath = Paths.get(buildDir, TracingConstants.LOG_BACK_FILE);
+        try (
+            InputStream is = getClass().getClassLoader().getResourceAsStream(TracingConstants.LOG_BACK_FILE);
+            FileOutputStream fos = new FileOutputStream(destPath.toString());
+        ) {
+            Assert.notNull(is, "no logback configuration found!");
+            is.transferTo(fos);
+            log.info("logback configuration copied!");
         } catch (IOException e) {
-            log.error("logback copy to target failed， occurred IOException: {}", e.getMessage());
+            log.error("logback configuration copy failed， occurred IOException: {}", e.getMessage());
         }
     }
 }

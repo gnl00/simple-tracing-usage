@@ -5,6 +5,5 @@ spring:
   application:
     name: @project.artifactId@
 
-logging:
-  level:
-    root: info
+project:
+  build-dir: @project.build.directory@
