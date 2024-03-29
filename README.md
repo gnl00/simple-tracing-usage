@@ -171,13 +171,15 @@ public void srvPool() {
 
 最后使用阿里巴巴开源的 transmittable-thread-local，历程基本和[这篇文章](https://blog.csdn.net/xiaolong7713/article/details/127274003)一致。
 
+缺点就是每次子线程执行都需要使用自定义的 Executor 来包装。
+
 还有一个解决方案是使用 [logback-mdc-ttl](https://github.com/ofpay/logback-mdc-ttl)
 
 3、跨服务传递
 
 跨服务传递就比较简单了，思路很清晰，拦截请求，在 RequestHeader 中添加 traceId，下游服务从 traceId 中获取即可。
 
-这里以 RestTemplate 为例，具体实现在 [tracing-core](tracing-core)com.stu.interceptor.RestTemplateInterceptor
+这里以 RestTemplate 为例，具体实现在 [tracing-core](tracing-core)#com.stu.interceptor.RestTemplateInterceptor
 
 不同的 Rest 客户端可能还是需要实现不同的拦截器，具体情况具体分析。
 
@@ -186,6 +188,27 @@ public void srvPool() {
 **总结**
 * 单体应用：MDC + transmittable-thread-local
 * 分布式：将 TraceId 设置到 RequestHeader 中向下传递
+
+之后就可以采集日志 ==> 日志输入 ELK 进行链路调用分析
+
+---
+
+## transmittable-thread-local
+
+transmittable-thread-local 是如何工作的？
+
+为什么使用它来包装线程和线程池之后就能让子线程继承到父线程的 thread-local？并且线程复用的时候不会获取到之前的数据？ 如何实现？
+
+核心方法是这几个：
+
+* com.alibaba.ttl.TransmittableThreadLocal.Transmitter#capture
+在 Transmitter 传输方中获取当前线程中所有的 TransmittableThreadLocal 和 ThreadLocal
+* com.alibaba.ttl.TransmittableThreadLocal.Transmitter#replay
+在线程中重放 capture 方法获取到的数据，返回重放前的备份
+* com.alibaba.ttl.TransmittableThreadLocal.Transmitter#restore
+恢复 replay 返回的备份到线程中
+
+可以看一下美团技术团队这篇文章：[一次「找回」TraceId的问题分析与过程思考](https://tech.meituan.com/2023/04/20/traceid-google-dapper-mtrace.html)
 
 ---
 

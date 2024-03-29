@@ -44,8 +44,9 @@ public class TraceInterceptor implements HandlerInterceptor {
         }
 
         /**
+         * before submit/execute
          * 在线程开始执行之前
-         * 将由父线程继承来的 traceId  copy 一份给 MDC
+         * 父子线程数据传输之前，将由父线程继承来的 traceId  copy 一份给 MDC
          */
         @Override
         protected void beforeExecute() {
@@ -54,6 +55,7 @@ public class TraceInterceptor implements HandlerInterceptor {
         }
 
         /**
+         * after submit/execute
          * 线程执行完后，执行 clear 操作
          */
         @Override
